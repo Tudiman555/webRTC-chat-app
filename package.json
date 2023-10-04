@@ -1,0 +1,16 @@
+{
+  "name": "webrtc-chat-app",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:backend": "cd backend && npm run start",
+    "start:frontend": "cd frontend && npm run dev",
+    "start": "concurrently --kill-others \"npm run start:backend\" \"npm run start:frontend\""
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.1"
+  }
+}

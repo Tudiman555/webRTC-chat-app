@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "module": "commonjs",
+    "target": "es2016",
+    "esModuleInterop": true,
+  },
+  "include": ["src/*", "../types/socket.ts"]
+}
