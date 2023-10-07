@@ -2,14 +2,16 @@ import cors from "cors";
 import express from "express";
 import { Server } from "socket.io";
 import http from "http";
-import { ClientToServerEvents, ServerToClientEvents, SocketEvents } from "../../types/socket";
-
+import {
+  ClientToServerEvents,
+  ServerToClientEvents,
+  SocketEvents,
+} from "../../types/socket";
 
 const app = express();
 const PORT = 4000;
 
 const CORS = cors();
-
 
 const server = http.createServer(app);
 app.use(CORS);
@@ -20,7 +22,6 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
     methods: ["GET", "POST"],
   },
 });
-
 
 io.on(SocketEvents.CONNECTION, (socket) => {
   socket.on(SocketEvents.JOIN_ROOM, ({ email, room }) => {
@@ -34,6 +35,12 @@ io.on(SocketEvents.CONNECTION, (socket) => {
 
   socket.on(SocketEvents.CALL_ACCEPTED, ({ to, answer }) => {
     io.to(to).emit(SocketEvents.CALL_ACCEPTED, { from: socket.id, answer });
+  });
+  socket.on(SocketEvents.EXCHANGE_ICECANDIDATE, ({ candidate, to }) => {
+    io.to(to).emit(SocketEvents.EXCHANGE_ICECANDIDATE, {
+      candidate,
+      from: socket.id,
+    });
   });
 });
 

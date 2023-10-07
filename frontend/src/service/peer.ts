@@ -17,28 +17,6 @@ class PeerService {
     if (this.peer) {
       const peerConnection = this.peer;
       await peerConnection.setLocalDescription();
-
-      // Check if ICE gathering is already complete
-      if (peerConnection.iceGatheringState === "complete") {
-        return peerConnection.localDescription;
-      }
-
-      // Create a Promise that resolves when ICE gathering is complete
-      const iceGatheringCompletePromise = new Promise((resolve) => {
-        if (peerConnection.iceGatheringState === "complete") {
-          resolve(null);
-        } else {
-          peerConnection.addEventListener("icegatheringstatechange", () => {
-            if (peerConnection.iceGatheringState === "complete") {
-              resolve(null);
-            }
-          });
-        }
-      });
-
-      // Wait for ICE gathering to complete
-      await iceGatheringCompletePromise;
-
       return peerConnection.localDescription;
     }
   }
@@ -48,33 +26,19 @@ class PeerService {
       const peerConnection = this.peer;
       await peerConnection.setRemoteDescription(offer);
       await peerConnection.setLocalDescription();
-
-      if (peerConnection.iceGatheringState === "complete") {
-        return peerConnection.localDescription;
-      }
-
-      const iceGatheringCompletePromise = new Promise((resolve) => {
-        if (peerConnection.iceGatheringState === "complete") {
-          resolve(null);
-        } else {
-          peerConnection.addEventListener("icegatheringstatechange", () => {
-            if (peerConnection.iceGatheringState === "complete") {
-              resolve(null);
-            }
-          });
-        }
-      });
-
-      // Wait for ICE gathering to complete
-      await iceGatheringCompletePromise;
-
       return peerConnection.localDescription;
+    }
+  }
+
+  async addIceCandidates(candidate: RTCIceCandidate) {
+    if (this.peer) {
+      this.peer.addIceCandidate(candidate);
     }
   }
 
   async setRemoteDescription(answer: RTCSessionDescriptionInit) {
     if (this.peer) {
-      this.peer.setRemoteDescription(new RTCSessionDescription(answer));
+      this.peer.setRemoteDescription(answer);
     }
   }
 }

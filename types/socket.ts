@@ -5,6 +5,7 @@ export enum SocketEvents {
   CALL_USER = "call-user",
   CALL_INCOMING = "call-incoming",
   CALL_ACCEPTED = "call-accepted",
+  EXCHANGE_ICECANDIDATE = "exchange-icecandidate",
 }
 
 export interface ClientToServerEvents {
@@ -17,6 +18,10 @@ export interface ClientToServerEvents {
   [SocketEvents.CALL_ACCEPTED]: (args: {
     to: string;
     answer: RTCSessionDescriptionInit;
+  }) => void;
+  [SocketEvents.EXCHANGE_ICECANDIDATE]: (args: {
+    to: string;
+    candidate: RTCIceCandidate;
   }) => void;
 }
 
@@ -34,6 +39,10 @@ export interface ServerToClientEvents {
   [SocketEvents.CALL_ACCEPTED]: (args: {
     from: string;
     answer: RTCSessionDescriptionInit;
+  }) => void;
+  [SocketEvents.EXCHANGE_ICECANDIDATE]: (args: {
+    from: string;
+    candidate: RTCIceCandidate;
   }) => void;
 }
 

@@ -12,7 +12,7 @@ const Lobby: React.FC<LobbyProps> = () => {
       e.preventDefault();
       socket.emit(SocketEvents.JOIN_ROOM, { email, room });
     },
-    [email, room]
+    [email, room, socket]
   );
   const navigate = useNavigate();
 

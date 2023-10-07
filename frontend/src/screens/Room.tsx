@@ -53,10 +53,10 @@ const Room: React.FC = () => {
         myVideo.current.srcObject = stream;
       }
       setRemoteSocketId(data.from);
-      await peerService.getAnswer(data.offer);
+      const answer = await peerService.getAnswer(data.offer);
       socket.emit(SocketEvents.CALL_ACCEPTED, {
         to: data.from,
-        answer: peerService.peer?.localDescription!,
+        answer: answer!,
       });
     },
     [socket]
@@ -85,24 +85,48 @@ const Room: React.FC = () => {
     }
   }, []);
 
+  const handleIcecandidate = useCallback(
+    (event: RTCPeerConnectionIceEvent) => {
+      if (event.candidate && remoteSocketId) {
+        socket.emit(SocketEvents.EXCHANGE_ICECANDIDATE, {
+          candidate: event.candidate,
+          to: remoteSocketId,
+        });
+      }
+    },
+    [remoteSocketId, socket]
+  );
+
+  const handleAddIcecandidate = useCallback(
+    (data: { from: string; candidate: RTCIceCandidate }) => {
+      peerService.addIceCandidates(data.candidate);
+    },
+    []
+  );
+
   useEffect(() => {
     socket.on(SocketEvents.USER_JOINED, handleUserJoined);
     socket.on(SocketEvents.CALL_INCOMING, handleCallIncoming);
     socket.on(SocketEvents.CALL_ACCEPTED, handleCallAccepted);
+    socket.on(SocketEvents.EXCHANGE_ICECANDIDATE, handleAddIcecandidate);
     peerService.peer?.addEventListener("track", handleAddTrack);
-    peerService.peer?.canTrickleIceCandidates;
+    peerService.peer?.addEventListener("icecandidate", handleIcecandidate);
 
     // [Clean up] we dont want to end up listing to the same event twice
     return () => {
       socket.off(SocketEvents.USER_JOINED, handleUserJoined);
       socket.off(SocketEvents.CALL_INCOMING, handleCallIncoming);
       socket.off(SocketEvents.CALL_ACCEPTED, handleCallAccepted);
+      socket.off(SocketEvents.EXCHANGE_ICECANDIDATE, handleAddIcecandidate);
       peerService.peer?.removeEventListener("track", handleAddTrack);
+      peerService.peer?.removeEventListener("icecandidate", handleIcecandidate);
     };
   }, [
+    handleAddIcecandidate,
     handleAddTrack,
     handleCallAccepted,
     handleCallIncoming,
+    handleIcecandidate,
     handleUserJoined,
     socket,
   ]);
