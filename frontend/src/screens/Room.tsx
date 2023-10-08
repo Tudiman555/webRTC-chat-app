@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSocket } from "../context/SocketProvider";
 import peerService from "../service/peer";
 import { SocketEvents } from "../../../types/socket";
+import SocketService from "../service/SocketService";
 
 const Room: React.FC = () => {
-  const { socket } = useSocket();
+  const { socket } = SocketService;
   const [remoteSocketId, setRemoteSocketId] = useState<string>();
   const myVideo = useRef<HTMLVideoElement>();
   const remoteVideo = useRef<HTMLVideoElement>();

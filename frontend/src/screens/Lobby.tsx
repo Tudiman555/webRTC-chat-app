@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useSocket } from "../context/SocketProvider";
 import { useNavigate } from "react-router-dom";
 import { SocketEvents } from "../../../types/socket";
+import SocketService from "../service/SocketService";
+
 interface LobbyProps {}
 const Lobby: React.FC<LobbyProps> = () => {
   const [email, setEmail] = useState("");
   const [room, setRoom] = useState("");
-  const { socket } = useSocket();
+  const { socket } = SocketService
   const handleSubmitForm = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
