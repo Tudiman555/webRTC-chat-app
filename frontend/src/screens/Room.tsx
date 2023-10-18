@@ -237,6 +237,7 @@ const Room: React.FC = () => {
             }}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ref={myVideo as any}
+            muted
             autoPlay
             playsInline
           />
