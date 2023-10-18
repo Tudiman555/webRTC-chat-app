@@ -13,7 +13,6 @@ class SocketService {
   }
 
   private connect(serverUrl: string) {
-    console.log("Hello")
     if (!this.socket) {
       this.socket = io(serverUrl);
 

@@ -7,6 +7,7 @@ import {
   ServerToClientEvents,
   SocketEvents,
 } from "../../types/socket";
+import { generateRoomId } from "./utils";
 
 const app = express();
 const PORT = 4000;
@@ -23,11 +24,34 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
   },
 });
 
+const activeRoomsById = new Map<string, string>();
+
 io.on(SocketEvents.CONNECTION, (socket) => {
-  socket.on(SocketEvents.JOIN_ROOM, ({ email, room }) => {
-    io.to(room).emit(SocketEvents.USER_JOINED, { email, id: socket.id });
-    socket.join(room);
-    io.to(socket.id).emit(SocketEvents.JOIN_ROOM, { email, room });
+  socket.on(SocketEvents.CREATE_ROOM, () => {
+    const roomId = generateRoomId();
+    activeRoomsById.set(socket.id, roomId);
+    socket.emit(SocketEvents.CREATE_ROOM, { roomId });
+  });
+
+  socket.on("disconnect", () => {
+    activeRoomsById.delete(socket.id);
+  });
+
+  socket.on(SocketEvents.JOIN_ROOM, ({ roomId }) => {
+    const activeRooms = Array.from(activeRoomsById.values());
+    if (!activeRooms.includes(roomId)) {
+      socket.emit(SocketEvents.ERR0R, {
+        error: "Sorry Room does not Exist !!",
+      });
+      return;
+    }
+    socket.join(roomId);
+    socket.emit(SocketEvents.JOIN_ROOM, {
+      isHost: !!activeRoomsById.get(socket.id),
+    });
+    socket.broadcast
+      .to(roomId)
+      .emit(SocketEvents.USER_JOINED, { id: socket.id });
   });
   socket.on(SocketEvents.CALL_USER, ({ id, offer }) => {
     io.to(id).emit(SocketEvents.CALL_INCOMING, { from: socket.id, offer });

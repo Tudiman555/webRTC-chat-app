@@ -1,61 +1,39 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SocketEvents } from "../../../types/socket";
 import SocketService from "../service/SocketService";
 
 interface LobbyProps {}
 const Lobby: React.FC<LobbyProps> = () => {
-  const [email, setEmail] = useState("");
-  const [room, setRoom] = useState("");
-  const { socket } = SocketService
+  const { socket } = SocketService;
+
   const handleSubmitForm = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      socket.emit(SocketEvents.JOIN_ROOM, { email, room });
+      socket.emit(SocketEvents.CREATE_ROOM);
     },
-    [email, room, socket]
+    [socket]
   );
   const navigate = useNavigate();
 
   const handleJoinRoom = useCallback(
-    (data: { email: string; room: string }) => {
-      navigate(`room/${data.room}`);
+    (data: { roomId: string }) => {
+      navigate(`room/${data.roomId}`);
     },
     [navigate]
   );
-
   useEffect(() => {
-    socket.on(SocketEvents.JOIN_ROOM, handleJoinRoom);
-
+    socket.on(SocketEvents.CREATE_ROOM, handleJoinRoom);
     // [Clean up] we dont want to end up listing to the same event twice
     return () => {
-      socket.off(SocketEvents.JOIN_ROOM, handleJoinRoom);
+      socket.off(SocketEvents.CREATE_ROOM, handleJoinRoom);
     };
   }, [handleJoinRoom, socket]);
 
   return (
     <div>
       <h1>Lobby</h1>
-      <form onSubmit={handleSubmitForm}>
-        <label htmlFor="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br />
-        <br />
-        <label htmlFor="room">Room</label>
-        <input
-          type="text"
-          id="room"
-          value={room}
-          onChange={(e) => setRoom(e.target.value)}
-        />
-        <br />
-        <button>Join</button>
-      </form>
+      <button onClick={handleSubmitForm}>Create Room</button>
     </div>
   );
 };
