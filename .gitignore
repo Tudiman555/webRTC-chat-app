@@ -6,3 +6,4 @@ build
 *.tsbuildinfo
 .idea/
 .DS_Store
+.parcel-cache
